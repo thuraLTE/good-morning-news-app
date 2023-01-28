@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Good Morning News</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="search_hint">Search...</string>
+    <string name="loading_label">Please wait...</string>
+    <string name="failed_connection_label">Please connect to the Internet</string>
+    <string name="tab">\u0009\u0009\u0009\u0009</string>
+    <string name="placeholder_news_content">\u0009\u0009\u0009\u0009IPL 2022, Kolkata Knight Riders vs Sunrisers Hyderabad Live Score Updates: Umran Malik struck twice in his first over as he dismissed Nitish Rana and skipper Shreyas Iyer to give SRH an upper hand in… [+1719 chars</string>
+    <string name="read_more"><u>Read More >></u></string>
+</resources>

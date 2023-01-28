@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.NewsInfoFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/news_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:fontFamily="@font/philosopher_bold"
+            android:textColor="@android:color/black"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            tools:text="Scindia's swift response to passenger; Vows to look into 'ridiculous' airline rule | Watch - Hindustan Times" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/news_title"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="5dp"
+            app:cardElevation="10dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/news_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:scaleType="centerCrop" />
+
+                <TextView
+                    android:id="@+id/news_author"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/news_image"
+                    android:layout_marginStart="14dp"
+                    android:layout_marginTop="7dp"
+                    android:layout_marginEnd="7dp"
+                    android:fontFamily="@font/hind_guntur"
+                    android:textColor="@color/dark_cyan"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    tools:text="Author Name" />
+
+                <TextView
+                    android:id="@+id/news_published_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/news_author"
+                    android:layout_marginVertical="7dp"
+                    android:layout_marginStart="14dp"
+                    android:fontFamily="@font/hind_guntur"
+                    android:textSize="16sp"
+                    tools:text="2022-05-14T14:32:52Z" />
+
+            </RelativeLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/news_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_box"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/crimson_text"
+            android:justificationMode="inter_word"
+            android:textColor="@android:color/black"
+            android:textSize="19sp"
+            tools:text="@string/placeholder_news_content" />
+
+        <TextView
+            android:id="@+id/read_more"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/news_content"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/crimson_text"
+            android:text="@string/read_more"
+            android:textColor="@android:color/holo_blue_dark"
+            android:textSize="19sp" />
+
+    </RelativeLayout>
+
+</ScrollView>
