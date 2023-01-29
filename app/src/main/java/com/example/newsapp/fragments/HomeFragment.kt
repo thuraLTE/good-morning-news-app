@@ -1,20 +1,19 @@
 package com.example.newsapp.fragments
 
 import android.app.Dialog
+import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Parcelable
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.widget.addTextChangedListener
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,8 +25,6 @@ import com.example.newsapp.models.Article
 import com.example.newsapp.models.getAllNewsCategories
 import com.example.newsapp.utils.isConnectedToInternet
 import com.example.newsapp.viewmodels.HomeViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment(), HeadlineAdapter.OnNewsHeadlineClicked {
 
@@ -46,8 +43,6 @@ class HomeFragment : Fragment(), HeadlineAdapter.OnNewsHeadlineClicked {
     private var progressDialog: Dialog? = null
     private var failedConnectionDialog: Dialog? = null
     private var scrollState: Parcelable? = null
-    private val QUERY_CHANGE = "Query Change"
-    private var isQueryChanged = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -68,7 +63,7 @@ class HomeFragment : Fragment(), HeadlineAdapter.OnNewsHeadlineClicked {
 
     private fun checkInternetConnection(view: View) {
         if (!isConnectedToInternet(view.context)) {
-            if (progressDialog?.isShowing == true) progressDialog!!.dismiss()
+            if (progressDialog?.isShowing == true) progressDialog!!.hide()
             createFailedConnectionDialog()
         } else {
             if (failedConnectionDialog?.isShowing == true) failedConnectionDialog!!.dismiss()
@@ -76,10 +71,9 @@ class HomeFragment : Fragment(), HeadlineAdapter.OnNewsHeadlineClicked {
             prepareCategoryAdapter()
             prepareHeadlineAdapter()
             onClickCategoryButton()
-            searchQuery()
+            createQueryFunctionality()
 
-            observeCurrentCategory()
-            if (isQueryChanged) observeCurrentQuery()
+            observeIsQueryChanged()
             observeArticleList()
         }
     }
@@ -98,6 +92,14 @@ class HomeFragment : Fragment(), HeadlineAdapter.OnNewsHeadlineClicked {
         }
     }
 
+    private fun observeIsQueryChanged() {
+        homeViewModel.isQueryChangedLiveData.observe(viewLifecycleOwner) { isChanged ->
+            Log.d(homeTag, "isQueryChanged: $isChanged")
+            if (isChanged) observeCurrentQuery()
+            else observeCurrentCategory()
+        }
+    }
+
     private fun observeCurrentCategory() {
         homeViewModel.apply {
             currentCategory.observe(viewLifecycleOwner) { category ->
@@ -109,16 +111,18 @@ class HomeFragment : Fragment(), HeadlineAdapter.OnNewsHeadlineClicked {
     private fun observeCurrentQuery() {
         homeViewModel.apply {
             currentQuery.observe(viewLifecycleOwner) { query ->
-                if (query.isNotEmpty())
+                if (query.isNotEmpty()) {
+                    Log.d(homeTag, "Saved query: $query")
                     getSearchedNewsHeadlines(query)
-                else return@observe
+                }
+                else observeCurrentCategory()
             }
         }
     }
 
     private fun observeArticleList() {
         homeViewModel.articleListLiveData.observe(viewLifecycleOwner) { list ->
-            if (progressDialog?.isShowing == true) progressDialog?.dismiss()
+            if (progressDialog?.isShowing == true) progressDialog?.hide()
             if (list != null) {
                 Log.d(homeTag, "${list.size}")
                 binding.apply {
@@ -126,8 +130,7 @@ class HomeFragment : Fragment(), HeadlineAdapter.OnNewsHeadlineClicked {
                     noResultsImg.visibility = View.GONE
                 }
                 headlineAdapter.setArticleList(list)
-            }
-            else {
+            } else {
                 binding.apply {
                     rvHeadlineNews.visibility = View.GONE
                     noResultsImg.visibility = View.VISIBLE
@@ -173,9 +176,8 @@ class HomeFragment : Fragment(), HeadlineAdapter.OnNewsHeadlineClicked {
             binding.searchEdit.text?.clear()
             homeViewModel.apply {
                 changeCategory(newsCategory!!)
-                clearQuery()
+                changeQuery(binding.searchEdit.text.toString())
             }
-            observeCurrentQuery()
             observeCurrentCategory()
             observeArticleList()
         }
@@ -201,49 +203,43 @@ class HomeFragment : Fragment(), HeadlineAdapter.OnNewsHeadlineClicked {
         }
     }
 
-    private fun searchQuery() {
-        binding.searchEdit.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                isQueryChanged = true
-                if (s?.isNotEmpty() == true) {
-                    val query = s.trim().toString()
-                    Log.d(homeTag, "Current Query: $query")
-                    searchHeadlinesAsTyped(query)
-                    observeArticleList()
-                }
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-            }
-
-        })
+    private fun createQueryFunctionality() {
+        binding.searchEdit.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                homeViewModel.changeQueryStatus()
+                performSearchQuery()
+                true
+            } else false
+        }
     }
 
-    private fun searchHeadlinesAsTyped(queryString: String) {
-        lifecycleScope.launch {
-            delay(500)
-            homeViewModel.changeQuery(queryString)
-            observeCurrentQuery()
+    private fun performSearchQuery() {
+        val userInput = binding.searchEdit.text
+        if (userInput?.isNotEmpty() == true) {
+            val query = userInput.trim().toString()
+            Log.d(homeTag, "Current Query: $query")
+            hideKeyboard()
+            searchHeadlinesPerQuery(query)
         }
+    }
+
+    private fun hideKeyboard() {
+        binding.searchEdit.clearFocus()
+        val inputMethodManager =
+            activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(binding.searchEdit.windowToken, 0)
+    }
+
+    private fun searchHeadlinesPerQuery(queryString: String) {
+        progressDialog?.show()
+        homeViewModel.changeQuery(queryString)
+        observeCurrentQuery()
+        observeArticleList()
     }
 
     private fun dismissDialogs() {
         progressDialog?.dismiss()
         failedConnectionDialog?.dismiss()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putBoolean(QUERY_CHANGE, isQueryChanged)
-        super.onSaveInstanceState(outState)
-    }
-
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        if (savedInstanceState != null)
-            isQueryChanged = savedInstanceState.getBoolean(QUERY_CHANGE)
-        super.onViewStateRestored(savedInstanceState)
     }
 
     override fun onItemClicked(article: Article) {

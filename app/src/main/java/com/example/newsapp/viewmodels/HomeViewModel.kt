@@ -27,14 +27,18 @@ class HomeViewModel : ViewModel() {
     private var _currentQuery = MutableLiveData<String>("")
     val currentQuery: LiveData<String> = _currentQuery
 
+    private var _isQueryChangedLiveData = MutableLiveData<Boolean>(false)
+    val isQueryChangedLiveData: LiveData<Boolean> = _isQueryChangedLiveData
+
     fun getNewsHeadlinesByCategory(category: String) {
         RetrofitInstance.retrofitService.getNewsHeadlinesByCategory(category, PAGE_PER_CATEGORY, API_KEY)
             .enqueue(object : Callback<ApiResponse> {
                 override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                     response.body()?.let { apiResponse ->
-                        val fetchedArticles = apiResponse?.articles
-                        Log.d(viewModelTag, "${fetchedArticles?.size}")
-                        _articleListLiveData.value = fetchedArticles?.toList()
+                        val fetchedArticles = apiResponse.articles
+                        Log.d(viewModelTag, "${fetchedArticles.size}")
+                        _articleListLiveData.value = emptyList()
+                        _articleListLiveData.value = fetchedArticles.toList()
                     }
                 }
 
@@ -49,9 +53,10 @@ class HomeViewModel : ViewModel() {
             .enqueue(object : Callback<ApiResponse> {
                 override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                     response.body()?.let { apiResponse ->
-                        val fetchedArticles = apiResponse?.articles
-                        Log.d(viewModelTag, "${fetchedArticles?.size}")
-                        _articleListLiveData.value = fetchedArticles?.toList()
+                        val fetchedArticles = apiResponse.articles
+                        Log.d(viewModelTag, "${fetchedArticles.size}")
+                        _articleListLiveData.value = emptyList()
+                        _articleListLiveData.value = fetchedArticles.toList()
                     }
                 }
 
@@ -70,7 +75,7 @@ class HomeViewModel : ViewModel() {
         _currentQuery.value = query
     }
 
-    fun clearQuery() {
-        _currentQuery.value = ""
+    fun changeQueryStatus() {
+        _isQueryChangedLiveData.value = true
     }
 }
