@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.example.newsapp.models.ApiResponse
 import com.example.newsapp.models.Article
 import com.example.newsapp.models.NewsCategory
-import com.example.newsapp.network.API_KEY
+import com.example.newsapp.network.key
 import com.example.newsapp.network.PAGE_PER_CATEGORY
 import com.example.newsapp.network.RetrofitInstance
 import retrofit2.Call
@@ -31,7 +31,7 @@ class HomeViewModel : ViewModel() {
     val isQueryChangedLiveData: LiveData<Boolean> = _isQueryChangedLiveData
 
     fun getNewsHeadlinesByCategory(category: String) {
-        RetrofitInstance.retrofitService.getNewsHeadlinesByCategory(category, PAGE_PER_CATEGORY, API_KEY)
+        RetrofitInstance.retrofitService.getNewsHeadlinesByCategory(category, PAGE_PER_CATEGORY, key)
             .enqueue(object : Callback<ApiResponse> {
                 override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                     response.body()?.let { apiResponse ->
@@ -49,7 +49,7 @@ class HomeViewModel : ViewModel() {
     }
 
     fun getSearchedNewsHeadlines(query: String) {
-        RetrofitInstance.retrofitService.getSearchedNewsHeadlines(query, API_KEY)
+        RetrofitInstance.retrofitService.getSearchedNewsHeadlines(query, key)
             .enqueue(object : Callback<ApiResponse> {
                 override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                     response.body()?.let { apiResponse ->

@@ -1,13 +1,14 @@
 package com.example.newsapp.network
 
+import com.example.newsapp.BuildConfig
 import com.example.newsapp.models.ApiResponse
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
 
 const val API_LINK = "https://newsapi.org/"
-const val API_KEY = "69098ca7575f42069325e5168a565e07"
 const val PAGE_PER_CATEGORY = 5
+const val key = BuildConfig.API_KEY //API key from local.properties file, which is not exposed to public repository
 
 interface NetworkService {
 
